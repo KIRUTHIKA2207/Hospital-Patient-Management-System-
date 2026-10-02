@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MediPulse - Modern Hospital Patient Management System with real-time patient directory, triage management, bed allocation, vitals monitoring, and medical records.">
+  <title>MediPulse | Hospital Patient Management System</title>
+  
+  <!-- Google Fonts for modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="light">
+  <!-- App Container -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-container">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            <path d="M12 5v14"/>
+            <path d="M5 12h14"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h2>MediPulse</h2>
+          <span class="brand-subtitle">Hospital Health System</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <span class="nav-category">Core Operations</span>
+        <button class="nav-item active" data-view="patients-view" id="navPatients">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Patients Directory</span>
+          <span class="badge-pill" id="sidebarPatientCount">0</span>
+        </button>
+        <button class="nav-item" data-view="wards-view" id="navWards">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+          <span>Bed & Ward Tracker</span>
+        </button>
+        <button class="nav-item" data-view="appointments-view" id="navAppointments">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+          <span>Doctor Rounds</span>
+        </button>
+        <button class="nav-item" data-view="analytics-view" id="navAnalytics">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          <span>Hospital Stats</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-emergency-card">
+        <div class="emergency-badge">
+          <span class="pulse-dot"></span>
+          Emergency Triage
+        </div>
+        <p>Direct rapid code-red admission protocol</p>
+        <button class="btn btn-emergency-quick" id="btnEmergencyAdmission">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Quick Triage Intake
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">DR</div>
+          <div class="user-details">
+            <span class="user-name">Dr. Elena Vance</span>
+            <span class="user-role">Chief of Medicine</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Bar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          </button>
+          <div class="breadcrumbs">
+            <span class="breadcrumb-root">MediPulse Hospital</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-active" id="currentViewTitle">Patients Directory</span>
+          </div>
+        </div>
+
+        <div class="topbar-center">
+          <div class="quick-clock">
+            <span class="live-dot"></span>
+            <span id="liveClock">--:--:--</span>
+            <span class="date-tag" id="liveDate">Oct 02, 2026</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Theme Switcher -->
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="Switch Theme (Light / Night Shift)" aria-label="Toggle dark/light theme">
+            <span class="theme-icon-light">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </span>
+            <span class="theme-icon-dark">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </span>
+          </button>
+
+          <!-- Critical Notifications Badge -->
+          <div class="notification-wrapper">
+            <button class="icon-btn" id="notificationsBtn" title="Critical Clinical Alerts">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span class="notification-indicator" id="alertCounterBadge">0</span>
+            </button>
+            <div class="notifications-dropdown" id="notificationsDropdown">
+              <div class="notif-header">
+                <h4>Clinical Alerts</h4>
+                <span class="badge-count" id="notifCountText">0 alerts</span>
+              </div>
+              <div class="notif-list" id="notifList">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Patient Primary Action -->
+          <button class="btn btn-primary" id="btnOpenNewPatientModal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Register Patient</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: PATIENTS DIRECTORY (DEFAULT) -->
+      <section class="content-view active" id="patients-view">
+        
+        <!-- Hospital Live Metrics Overview Cards -->
+        <div class="stats-grid">
+          <div class="stat-card stat-total">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Total Patients</span>
+              <h3 class="stat-value" id="statTotalPatients">0</h3>
+              <span class="stat-meta">Active & registered</span>
+            </div>
+          </div>
+
+          <div class="stat-card stat-admitted">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Inpatient Admitted</span>
+              <h3 class="stat-value" id="statAdmittedPatients">0</h3>
+              <span class="stat-meta text-emerald" id="statOccupancyRate">0% occupancy</span>
+            </div>
+          </div>
+
+          <div class="stat-card stat-critical">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">ICU & Critical</span>
+              <h3 class="stat-value" id="statCriticalPatients">0</h3>
+              <span class="stat-meta text-rose">Requires constant vitals check</span>
+            </div>
+          </div>
+
+          <div class="stat-card stat-discharged">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Discharged</span>
+              <h3 class="stat-value" id="statDischargedPatients">0</h3>
+              <span class="stat-meta text-muted">Archived treatments</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Control Panel -->
+        <div class="filter-panel">
+          <div class="filter-search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="patientSearchInput" placeholder="Search by patient name, ID (e.g. MED-101), doctor, or diagnosis..." autocomplete="off">
+            <button class="clear-search-btn" id="clearSearchBtn" title="Clear search">&times;</button>
+          </div>
+
+          <div class="filter-controls">
+            <div class="select-group">
+              <label for="filterDepartment">Department:</label>
+              <select id="filterDepartment" class="filter-select">
+                <option value="ALL">All Departments</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="General Medicine">General Medicine</option>
+                <option value="Intensive Care (ICU)">Intensive Care (ICU)</option>
+                <option value="Emergency (ER)">Emergency (ER)</option>
+              </select>
+            </div>
+
+            <div class="select-group">
+              <label for="filterStatus">Status:</label>
+              <select id="filterStatus" class="filter-select">
+                <option value="ALL">All Statuses</option>
+                <option value="Admitted">Admitted (Inpatient)</option>
+                <option value="Outpatient">Outpatient</option>
+                <option value="ICU">ICU</option>
+                <option value="Discharged">Discharged</option>
+              </select>
+            </div>
+
+            <div class="select-group">
+              <label for="filterTriage">Triage Priority:</label>
+              <select id="filterTriage" class="filter-select">
+                <option value="ALL">All Priorities</option>
+                <option value="Critical">Critical (Code Red)</option>
+                <option value="Urgent">Urgent (Yellow)</option>
+                <option value="Normal">Normal (Green)</option>
+              </select>
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn btn-outline" id="btnExportCSV" title="Export patient records to CSV spreadsheet">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Export CSV</span>
+              </button>
+              <button class="btn btn-ghost" id="btnResetData" title="Reload clean demo data">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span>Sample Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patients Table Card -->
+        <div class="card table-card">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3 class="card-title">Patient Records Directory</h3>
+              <span class="records-count-chip" id="recordsCounterDisplay">Showing 0 patients</span>
+            </div>
+            <div class="card-header-right">
+              <div class="view-toggle">
+                <button class="view-toggle-btn active" id="viewToggleTable" title="Table View">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </button>
+                <button class="view-toggle-btn" id="viewToggleGrid" title="Card Grid View">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-responsive" id="patientsTableView">
+            <table class="data-table" id="patientsTable">
+              <thead>
+                <tr>
+                  <th data-sort="id">Patient ID <span class="sort-icon">&updownarrow;</span></th>
+                  <th data-sort="name">Patient Profile <span class="sort-icon">&updownarrow;</span></th>
+                  <th data-sort="age">Age / Blood</th>
+                  <th data-sort="department">Department & Doctor <span class="sort-icon">&updownarrow;</span></th>
+                  <th data-sort="room">Ward / Bed</th>
+                  <th data-sort="triage">Triage Priority</th>
+                  <th>Latest Vitals</th>
+                  <th data-sort="status">Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Grid Container (Alternate View) -->
+          <div class="patient-grid-view hidden" id="patientsGridView">
+            <!-- Dynamically populated cards -->
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state hidden" id="tableEmptyState">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            </div>
+            <h4>No Patient Records Found</h4>
+            <p>No patients matched your current search filters or criteria.</p>
+            <button class="btn btn-outline" id="btnResetFilters">Reset Filters</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- VIEW 2: BED & WARD TRACKER -->
+      <section class="content-view" id="wards-view">
+        <div class="view-header">
+          <div>
+            <h2 class="section-title">Ward Occupancy & Bed Allocation Map</h2>
+            <p class="section-subtitle">Real-time bed availability across hospital intensive care and general units</p>
+          </div>
+          <div class="ward-legend">
+            <span class="legend-item"><span class="legend-box available"></span> Available</span>
+            <span class="legend-item"><span class="legend-box occupied"></span> Occupied</span>
+            <span class="legend-item"><span class="legend-box critical"></span> Critical Care</span>
+          </div>
+        </div>
+
+        <div class="wards-container" id="wardsContainer">
+          <!-- Dynamically populated wards -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: DOCTOR ROUNDS & APPOINTMENTS -->
+      <section class="content-view" id="appointments-view">
+        <div class="view-header">
+          <div>
+            <h2 class="section-title">Doctor Rounds & Clinical Consultations</h2>
+            <p class="section-subtitle">Daily clinical visit schedule, attending physician assignments, and consultation slots</p>
+          </div>
+          <button class="btn btn-primary" id="btnScheduleRound">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Schedule Round</span>
+          </button>
+        </div>
+
+        <div class="schedule-grid">
+          <div class="card schedule-timeline-card">
+            <div class="card-header">
+              <h3 class="card-title">Today's Scheduled Rounds</h3>
+              <span class="badge-pill" id="roundsCountBadge">0 Rounds</span>
+            </div>
+            <div class="rounds-timeline" id="roundsTimelineList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="card physicians-card">
+            <div class="card-header">
+              <h3 class="card-title">Attending Physicians on Duty</h3>
+            </div>
+            <div class="physicians-list" id="physiciansDutyList">
+              <!-- Physician cards -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: HOSPITAL STATS & ANALYTICS -->
+      <section class="content-view" id="analytics-view">
+        <div class="view-header">
+          <div>
+            <h2 class="section-title">Department Distribution & Clinical Metrics</h2>
+            <p class="section-subtitle">Operational census breakdown, triage statistics, and patient flow overview</p>
+          </div>
+        </div>
+
+        <div class="analytics-dashboard">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Patients by Department</h3>
+            </div>
+            <div class="dept-distribution-list" id="deptDistributionList">
+              <!-- Department progress bars -->
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Triage Acuity Distribution</h3>
+            </div>
+            <div class="triage-breakdown" id="triageBreakdown">
+              <!-- Triage bars -->
+            </div>
+          </div>
+
+          <div class="card blood-group-card">
+            <div class="card-header">
+              <h3 class="card-title">Inpatient Blood Group Registry</h3>
+            </div>
+            <div class="blood-group-grid" id="bloodGroupGrid">
+              <!-- Blood groups chips -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== MODAL 1: REGISTER / EDIT PATIENT ==================== -->
+  <div class="modal-overlay" id="patientModalOverlay">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="patientModalTitle">Register New Patient</h3>
+          <p class="modal-subtitle">Enter clinical admission data and patient demographic details</p>
+        </div>
+        <button class="modal-close-btn" id="closePatientModalBtn">&times;</button>
+      </div>
+
+      <form id="patientForm" novalidate>
+        <input type="hidden" id="formPatientIdHidden">
+
+        <div class="form-sections">
+          <!-- Section 1: Demographics -->
+          <div class="form-section-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>1. Patient Demographics</span>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label for="inputFullName">Full Name *</label>
+              <input type="text" id="inputFullName" required placeholder="e.g. Sarah Jenkins">
+              <span class="field-error" id="errorFullName">Please enter patient's full name</span>
+            </div>
+            <div class="form-group">
+              <label for="inputAge">Age (Years) *</label>
+              <input type="number" id="inputAge" min="0" max="120" required placeholder="e.g. 42">
+              <span class="field-error" id="errorAge">Valid age required</span>
+            </div>
+            <div class="form-group">
+              <label for="selectGender">Gender *</label>
+              <select id="selectGender" required>
+                <option value="">Select Gender</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Non-Binary">Non-Binary</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label for="selectBloodGroup">Blood Group *</label>
+              <select id="selectBloodGroup" required>
+                <option value="O+">O+ (Positive)</option>
+                <option value="O-">O- (Negative)</option>
+                <option value="A+">A+ (Positive)</option>
+                <option value="A-">A- (Negative)</option>
+                <option value="B+">B+ (Positive)</option>
+                <option value="B-">B- (Negative)</option>
+                <option value="AB+">AB+ (Positive)</option>
+                <option value="AB-">AB- (Negative)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputPhone">Contact Phone *</label>
+              <input type="tel" id="inputPhone" required placeholder="e.g. +1 (555) 349-2810">
+              <span class="field-error" id="errorPhone">Phone number required</span>
+            </div>
+            <div class="form-group">
+              <label for="inputEmergencyContact">Emergency Contact (Name & Phone)</label>
+              <input type="text" id="inputEmergencyContact" placeholder="e.g. David Jenkins - (555) 902-1142">
+            </div>
+          </div>
+
+          <!-- Section 2: Clinical Admission -->
+          <div class="form-section-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span>2. Hospital Admission & Ward Details</span>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label for="selectDepartment">Medical Department *</label>
+              <select id="selectDepartment" required>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="General Medicine">General Medicine</option>
+                <option value="Intensive Care (ICU)">Intensive Care (ICU)</option>
+                <option value="Emergency (ER)">Emergency (ER)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="selectDoctor">Attending Physician *</label>
+              <select id="selectDoctor" required>
+                <option value="Dr. Elena Vance (Cardiology)">Dr. Elena Vance (Cardiology)</option>
+                <option value="Dr. Marcus Thorne (Neurology)">Dr. Marcus Thorne (Neurology)</option>
+                <option value="Dr. Amira Patel (Pediatrics)">Dr. Amira Patel (Pediatrics)</option>
+                <option value="Dr. Robert Hayes (Orthopedics)">Dr. Robert Hayes (Orthopedics)</option>
+                <option value="Dr. Sarah Lin (ICU Specialist)">Dr. Sarah Lin (ICU Specialist)</option>
+                <option value="Dr. James Mitchell (General Med)">Dr. James Mitchell (General Med)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputRoomBed">Ward & Bed Allocation *</label>
+              <input type="text" id="inputRoomBed" required placeholder="e.g. Ward 3B - Bed 14">
+              <span class="field-error" id="errorRoomBed">Bed allocation required</span>
+            </div>
+          </div>
+
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label for="selectStatus">Admission Status *</label>
+              <select id="selectStatus" required>
+                <option value="Admitted">Admitted (Inpatient)</option>
+                <option value="ICU">ICU (Critical Care)</option>
+                <option value="Outpatient">Outpatient</option>
+                <option value="Discharged">Discharged</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="selectTriage">Triage Priority *</label>
+              <select id="selectTriage" required>
+                <option value="Normal">Normal (Green - Stable)</option>
+                <option value="Urgent">Urgent (Yellow - Priority)</option>
+                <option value="Critical">Critical (Red - Immediate)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputAdmissionDate">Admission Date *</label>
+              <input type="date" id="inputAdmissionDate" required>
+            </div>
+          </div>
+
+          <!-- Section 3: Clinical Diagnosis & Vitals -->
+          <div class="form-section-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>3. Clinical Diagnosis & Baseline Vitals</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="inputDiagnosis">Primary Diagnosis / Symptoms *</label>
+              <input type="text" id="inputDiagnosis" required placeholder="e.g. Acute Coronary Syndrome, severe chest pain">
+              <span class="field-error" id="errorDiagnosis">Primary diagnosis required</span>
+            </div>
+          </div>
+
+          <div class="form-row form-row-4">
+            <div class="form-group">
+              <label for="inputHeartRate">Heart Rate (BPM)</label>
+              <input type="number" id="inputHeartRate" placeholder="78" min="30" max="220">
+            </div>
+            <div class="form-group">
+              <label for="inputBP">Blood Pressure</label>
+              <input type="text" id="inputBP" placeholder="120/80">
+            </div>
+            <div class="form-group">
+              <label for="inputSpO2">SpO2 (%)</label>
+              <input type="number" id="inputSpO2" placeholder="98" min="60" max="100">
+            </div>
+            <div class="form-group">
+              <label for="inputTemp">Temperature (°F)</label>
+              <input type="number" id="inputTemp" step="0.1" placeholder="98.6">
+            </div>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="inputAllergies">Known Allergies</label>
+              <input type="text" id="inputAllergies" placeholder="e.g. Penicillin, Latex, None reported">
+            </div>
+            <div class="form-group">
+              <label for="inputInsurance">Insurance Carrier / Policy</label>
+              <input type="text" id="inputInsurance" placeholder="e.g. BlueCross Shield - Policy #98124">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="inputNotes">Attending Notes & Treatment Plan</label>
+              <textarea id="inputNotes" rows="2" placeholder="Initial observation notes, prescribed medications, follow-up instructions..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelPatientModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSavePatient">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span id="btnSavePatientText">Save Patient Record</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: PATIENT MEDICAL DOSSIER / FULL VIEW ==================== -->
+  <div class="modal-overlay" id="dossierModalOverlay">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header dossier-header">
+        <div class="dossier-patient-head">
+          <div class="patient-avatar-large" id="dossierAvatar">JD</div>
+          <div>
+            <div class="dossier-title-line">
+              <h3 class="modal-title" id="dossierName">Patient Full Name</h3>
+              <span class="badge-code" id="dossierId">MED-0000</span>
+              <span class="triage-chip" id="dossierTriage">Normal</span>
+              <span class="status-chip" id="dossierStatus">Admitted</span>
+            </div>
+            <p class="modal-subtitle" id="dossierMeta">Age: 45 | Gender: Male | Blood: O+ | Admitted: Oct 01, 2026</p>
+          </div>
+        </div>
+        <div class="dossier-header-actions">
+          <button class="btn btn-outline btn-sm" id="btnPrintDossier" title="Print clinical patient summary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+            Print Dossier
+          </button>
+          <button class="modal-close-btn" id="closeDossierModalBtn">&times;</button>
+        </div>
+      </div>
+
+      <div class="dossier-body">
+        <!-- Vitals Metric Gauges -->
+        <div class="vitals-strip">
+          <div class="vital-box" id="vitalBoxHeart">
+            <div class="vital-icon heart-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </div>
+            <div class="vital-info">
+              <span class="vital-name">Heart Rate</span>
+              <div class="vital-val-row">
+                <span class="vital-value" id="dossierHeartRate">--</span>
+                <span class="vital-unit">BPM</span>
+              </div>
+              <span class="vital-status" id="dossierHeartStatus">Normal</span>
+            </div>
+          </div>
+
+          <div class="vital-box" id="vitalBoxBP">
+            <div class="vital-icon bp-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="vital-info">
+              <span class="vital-name">Blood Pressure</span>
+              <div class="vital-val-row">
+                <span class="vital-value" id="dossierBP">--/--</span>
+                <span class="vital-unit">mmHg</span>
+              </div>
+              <span class="vital-status" id="dossierBPStatus">Optimal</span>
+            </div>
+          </div>
+
+          <div class="vital-box" id="vitalBoxSpO2">
+            <div class="vital-icon spo2-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            </div>
+            <div class="vital-info">
+              <span class="vital-name">Oxygen (SpO2)</span>
+              <div class="vital-val-row">
+                <span class="vital-value" id="dossierSpO2">--</span>
+                <span class="vital-unit">%</span>
+              </div>
+              <span class="vital-status" id="dossierSpO2Status">Normal</span>
+            </div>
+          </div>
+
+          <div class="vital-box" id="vitalBoxTemp">
+            <div class="vital-icon temp-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
+            </div>
+            <div class="vital-info">
+              <span class="vital-name">Body Temp</span>
+              <div class="vital-val-row">
+                <span class="vital-value" id="dossierTemp">--</span>
+                <span class="vital-unit">°F</span>
+              </div>
+              <span class="vital-status" id="dossierTempStatus">Afebrile</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dossier Columns -->
+        <div class="dossier-grid">
+          <!-- Left Column: Admission & Care info -->
+          <div class="dossier-col">
+            <div class="info-block">
+              <h4 class="info-block-title">Clinical Placement & Physician</h4>
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="info-key">Department:</span>
+                  <span class="info-val" id="dossierDept">--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-key">Attending Physician:</span>
+                  <span class="info-val font-semibold" id="dossierDoctor">--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-key">Assigned Bed:</span>
+                  <span class="info-val" id="dossierRoom">--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-key">Admission Date:</span>
+                  <span class="info-val" id="dossierAdmissionDate">--</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-block">
+              <h4 class="info-block-title">Emergency & Insurance</h4>
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="info-key">Primary Phone:</span>
+                  <span class="info-val" id="dossierPhone">--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-key">Emergency Contact:</span>
+                  <span class="info-val" id="dossierEmergency">--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-key">Insurance Policy:</span>
+                  <span class="info-val" id="dossierInsurance">--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-key">Allergies:</span>
+                  <span class="info-val allergy-tag" id="dossierAllergies">None</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Medical Notes & History Timeline -->
+          <div class="dossier-col">
+            <div class="info-block">
+              <h4 class="info-block-title">Primary Clinical Diagnosis</h4>
+              <div class="diagnosis-callout" id="dossierDiagnosis">--</div>
+            </div>
+
+            <div class="info-block">
+              <h4 class="info-block-title">Physician Notes & Treatment Protocol</h4>
+              <div class="clinical-notes-box" id="dossierNotes">--</div>
+            </div>
+
+            <div class="info-block">
+              <div class="flex-between">
+                <h4 class="info-block-title">Clinical Actions</h4>
+              </div>
+              <div class="dossier-actions-row">
+                <button class="btn btn-outline btn-sm" id="btnDossierUpdateVitals">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  Update Vitals
+                </button>
+                <button class="btn btn-outline btn-sm" id="btnDossierEditRecord">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Edit Information
+                </button>
+                <button class="btn btn-discharge btn-sm" id="btnDossierToggleDischarge">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  <span>Toggle Discharge</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: QUICK VITALS UPDATE ==================== -->
+  <div class="modal-overlay" id="vitalsModalOverlay">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Record Live Vitals</h3>
+          <p class="modal-subtitle" id="vitalsPatientName">Patient: --</p>
+        </div>
+        <button class="modal-close-btn" id="closeVitalsModalBtn">&times;</button>
+      </div>
+
+      <form id="vitalsForm">
+        <input type="hidden" id="vitalsPatientIdHidden">
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label for="quickHeartRate">Heart Rate (BPM)</label>
+            <input type="number" id="quickHeartRate" min="30" max="240" required placeholder="75">
+          </div>
+          <div class="form-group">
+            <label for="quickBP">Blood Pressure (SYS/DIA)</label>
+            <input type="text" id="quickBP" required placeholder="120/80">
+          </div>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label for="quickSpO2">SpO2 (%)</label>
+            <input type="number" id="quickSpO2" min="50" max="100" required placeholder="98">
+          </div>
+          <div class="form-group">
+            <label for="quickTemp">Temperature (°F)</label>
+            <input type="number" id="quickTemp" step="0.1" required placeholder="98.6">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelVitalsModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Vitals</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
